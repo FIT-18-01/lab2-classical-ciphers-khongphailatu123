@@ -36,7 +36,40 @@ string rail_fence_encrypt(const string &plaintext, int rails) {
 
 string rail_fence_decrypt(const string &ciphertext, int rails) {
     // TODO(student): Q5
-    return ciphertext;
+    if (rails <= 1 || ciphertext.empty()) return ciphertext;
+
+    int n = ciphertext.length();
+    vector<int> rail_lengths(rails, 0);
+
+    // Calculate length of each rail during encryption
+    int rail = 0;
+    int direction = 1;
+    for (int i = 0; i < n; i++) {
+        rail_lengths[rail]++;
+        rail += direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
+    }
+
+    // Split ciphertext into each rail
+    vector<string> fence(rails, "");
+    int idx = 0;
+    for (int i = 0; i < rails; i++) {
+        fence[i] = ciphertext.substr(idx, rail_lengths[i]);
+        idx += rail_lengths[i];
+    }
+
+    // Reconstruct plaintext by following zigzag pattern
+    string plaintext;
+    vector<int> rail_idx(rails, 0);
+    rail = 0;
+    direction = 1;
+    for (int i = 0; i < n; i++) {
+        plaintext += fence[rail][rail_idx[rail]++];
+        rail += direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
+    }
+
+    return plaintext;
 }
 
 string read_message_from_file(const string &path) {
